@@ -11,6 +11,7 @@ browser Playground. Deterministic on-device tone rendering lands in M3.
 from __future__ import annotations
 
 import json
+import os
 
 from dotenv import find_dotenv, load_dotenv
 
@@ -93,8 +94,15 @@ class MorseTutor(Agent):
 
 server = AgentServer()
 
+# Dispatch mode. By default the agent uses *automatic* dispatch so it joins any
+# room a frontend creates (e.g. the iOS app via a LiveKit sandbox token server).
+# Set LIVEKIT_AGENT_NAME to switch to explicit/named dispatch (production, or the
+# Agent Console which dispatches by name).
+_agent_name = os.getenv("LIVEKIT_AGENT_NAME", "").strip()
+_session_opts = {"agent_name": _agent_name} if _agent_name else {}
 
-@server.rtc_session(agent_name="morse-tutor")
+
+@server.rtc_session(**_session_opts)
 async def entrypoint(ctx: agents.JobContext) -> None:
     session = AgentSession(
         stt=inference.STT(model="deepgram/nova-3", language="en"),

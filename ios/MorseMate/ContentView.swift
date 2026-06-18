@@ -74,10 +74,16 @@ struct ContentView: View {
 
     private var connectedView: some View {
         VStack(spacing: 20) {
-            orb(active: manager.isAgentSpeaking)
-            Text(manager.agentStatus)
-                .font(.headline)
-                .foregroundStyle(.secondary)
+            if manager.morse.isPlaying {
+                keyer(on: manager.morse.isToneOn)
+                Text("Morse: \(manager.morse.lastText)")
+                    .font(.headline.monospaced())
+            } else {
+                orb(active: manager.isAgentSpeaking)
+                Text(manager.agentStatus)
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+            }
             Button(role: .destructive) {
                 Task { await manager.disconnect() }
             } label: {
@@ -102,6 +108,19 @@ struct ContentView: View {
             )
             .animation(.easeInOut(duration: 0.35).repeatCount(active ? .max : 1, autoreverses: true),
                        value: active)
+    }
+
+    /// Crisp on/off flash that mirrors the dits and dahs (no easing) while the
+    /// agent's play_morse runs.
+    private func keyer(on: Bool) -> some View {
+        RoundedRectangle(cornerRadius: 28)
+            .fill(on ? Color.yellow : Color.secondary.opacity(0.18))
+            .frame(width: 160, height: 160)
+            .overlay(
+                Image(systemName: "antenna.radiowaves.left.and.right")
+                    .font(.system(size: 48))
+                    .foregroundStyle(on ? .black : .secondary)
+            )
     }
 }
 

@@ -10,6 +10,7 @@ browser Playground. Deterministic on-device tone rendering lands in M3.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 
@@ -47,20 +48,28 @@ How you make sound — non-negotiable:
   the MorseMate app and keep practicing conversationally.
 
 Each practice round — follow this loop exactly, in this order:
-1. PLAY one character with `play_morse`, then stop and wait. Play only ONE per round.
-2. Let the student say what they think they heard.
-3. When they answer, FIRST give feedback on THAT answer: say whether it was right, and
-   if not, what it actually was. Do this before anything else.
-4. THEN give a short heads-up that the next one is coming — for example, "Nice — here's
-   the next one, listen." Only AFTER speaking that cue, call `play_morse` for the next
-   character.
-5. Go back to waiting for their answer, and repeat.
+0. If user just come in to the session, make a self introduction and what will you teach.
+    THEN give a short heads-up that the next one is coming — for example, "here's the first one, listen."
+1. PLAY one test (here, one test means e, t, or any combination of e and t. Starting from 
+    1-charactor sequence, then 2-character sequence, and then to 3 character sequence) with
+     `play_morse`, then stop and wait. Play only ONE per round.
+2. Stop and wait. Let the student say what they think they heard.
+3. When they answer, your spoken reply comes first and must finish before any sound:
+   a. Judge their answer out loud. If they were RIGHT, say so warmly. If they were
+      WRONG, gently correct them and tell them what it actually was.
+   b. Then say a short heads-up that the next one is coming, e.g. "Okay, here's the
+      next one, listen."
+4. ONLY after speaking both (a) and (b), call `play_morse` for the next test. The
+   `play_morse` call is always the LAST thing in your turn — never the first.
+5. Then stop and wait, and repeat from step 2.
 
-Critical ordering rules:
-- Never play the next character before you have given feedback on the previous answer.
-- Feedback first, THEN the "here's the next one" cue, THEN the new sound. Never blend a
-  judgement of the old answer with a brand-new sound.
-- After you play a character, do not keep talking over it — wait for the student.
+Critical ordering rules — the most important rules in this prompt:
+- SPEAK FIRST, PLAY LAST. Never call `play_morse` at the start of a turn or before you
+  have spoken. Your judgement and the "here's the next one" cue must be fully spoken
+  before the tones play.
+- One sound per turn: judge the previous answer, cue the next, then play exactly ONE
+  test. Never play a new sound while still judging — finish speaking the judgement first.
+- After you play, do not talk over the tones — wait for the student's answer.
 
 Style:
 - Speak naturally and concisely. Everything you say is spoken aloud, so no on-screen
@@ -84,6 +93,17 @@ class MorseTutor(Agent):
             text: The letters/digits to render as Morse (e.g. "E", "ET").
             wpm: Words per minute. Default 10 (a slow, beginner-friendly pace).
         """
+        # Let whatever the tutor just said (the welcome, a cue, or feedback) finish
+        # playing before the tones start. Otherwise the Morse can fire before the
+        # speech reaches the student — e.g. tones before the welcome on cold start.
+        try:
+            await context.wait_for_playout()
+        except Exception:
+            pass
+        # A short beat after the tutor's speech before the tones, so the audio
+        # doesn't start abruptly on the heels of the spoken cue.
+        await asyncio.sleep(1.0)
+
         remotes = list(self._room.remote_participants.values())
         if not remotes:
             return {"status": "no_device"}
@@ -127,12 +147,21 @@ async def entrypoint(ctx: agents.JobContext) -> None:
 
     await session.start(room=ctx.room, agent=MorseTutor(room=ctx.room))
 
-    await session.generate_reply(
-        instructions=(
+    # The client signals intent via the room name: "-cont-" means the student is
+    # resuming, so skip the full introduction and go straight back to practice.
+    is_continue = "-cont-" in (ctx.room.name or "")
+    if is_continue:
+        greeting = (
+            "Welcome the student back in one short sentence and go straight into "
+            "practice — do NOT repeat your full self-introduction. Then start the "
+            "practice loop with the first test."
+        )
+    else:
+        greeting = (
             "Greet the student warmly as MorseMate, say you'll teach Morse code by "
             "ear, and offer to start with the first two characters."
         )
-    )
+    await session.generate_reply(instructions=greeting)
 
 
 if __name__ == "__main__":

@@ -23,6 +23,11 @@ final class RoomManager: ObservableObject {
     @Published var isConnecting = false
     @Published var errorMessage: String?
 
+    /// Whether a session has run during this app launch. In-memory only, so fully
+    /// killing the app resets it (cold start → only "Start talking"), while
+    /// backgrounding preserves it. Drives the continue / new-session choice.
+    @Published private(set) var hasPreviousSession = false
+
     private var roomChanges: AnyCancellable?
     private var morseChanges: AnyCancellable?
     private let tokenService = TokenService()
@@ -68,7 +73,23 @@ final class RoomManager: ObservableObject {
 
     // MARK: Actions
 
-    func connect() async {
+    /// Start a brand-new session: a fresh `morse-new-…` room, so the agent gives
+    /// its full self-introduction and starts over.
+    func startNewSession() async {
+        await connect(roomName: "morse-new-\(Self.shortID())")
+    }
+
+    /// Resume practicing: a fresh `morse-cont-…` room (reliable agent dispatch),
+    /// but the agent skips the introduction and goes straight back to practice.
+    func continueLastSession() async {
+        await connect(roomName: "morse-cont-\(Self.shortID())")
+    }
+
+    private static func shortID() -> String {
+        String(UUID().uuidString.prefix(8).lowercased())
+    }
+
+    private func connect(roomName: String) async {
         errorMessage = nil
         isConnecting = true
         defer { isConnecting = false }
@@ -81,6 +102,7 @@ final class RoomManager: ObservableObject {
 
         do {
             let details = try await tokenService.fetchConnectionDetails(
+                roomName: roomName,
                 participantName: AppConfig.participantName
             )
             try await room.connect(
@@ -89,6 +111,7 @@ final class RoomManager: ObservableObject {
                 connectOptions: ConnectOptions(enableMicrophone: true)
             )
             await registerMorseHandler()
+            hasPreviousSession = true
         } catch let error as TokenServiceError {
             errorMessage = error.errorDescription
         } catch {
@@ -111,7 +134,7 @@ final class RoomManager: ObservableObject {
             else {
                 return #"{"status":"bad_request"}"#
             }
-            let ms = await self.morse.play(command.text, wpm: command.wpm ?? 20)
+            let ms = await self.morse.play(command.text, wpm: command.wpm ?? 10)
             return #"{"status":"played","durationMs":\#(ms)}"#
         }
     }

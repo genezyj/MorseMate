@@ -16,7 +16,7 @@ struct ContentView: View {
             case .connecting, .reconnecting:
                 connectingView
             default:
-                disconnectedView
+                if manager.isConnecting { connectingView } else { disconnectedView }
             }
 
             Spacer()
@@ -32,6 +32,7 @@ struct ContentView: View {
         .padding(24)
         .animation(.default, value: manager.connectionState)
         .animation(.default, value: manager.errorMessage)
+        .animation(.default, value: manager.hasPreviousSession)
     }
 
     // MARK: Sections
@@ -46,18 +47,48 @@ struct ContentView: View {
         }
     }
 
+    @ViewBuilder
     private var disconnectedView: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 16) {
             orb(active: false)
-            Text("Tap to start a lesson")
-                .foregroundStyle(.secondary)
-            Button {
-                Task { await manager.connect() }
-            } label: {
-                Label("Start talking", systemImage: "mic.fill")
-                    .frame(maxWidth: .infinity)
+            if !manager.hasPreviousSession {
+                // Cold start — only one way in.
+                Text("Tap to start a lesson")
+                    .foregroundStyle(.secondary)
+                sessionButton("Start talking", systemImage: "mic.fill", prominent: true) {
+                    Task { await manager.startNewSession() }
+                }
+            } else {
+                // A session has ended this launch — offer to continue or restart.
+                Text("Session ended")
+                    .foregroundStyle(.secondary)
+                sessionButton("Continue last session", systemImage: "arrow.clockwise.circle.fill",
+                              prominent: true) {
+                    Task { await manager.continueLastSession() }
+                }
+                sessionButton("Start a new session", systemImage: "sparkles", prominent: false) {
+                    Task { await manager.startNewSession() }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func sessionButton(
+        _ title: String, systemImage: String, prominent: Bool, action: @escaping () -> Void
+    ) -> some View {
+        if prominent {
+            Button(action: action) {
+                Label(title, systemImage: systemImage).frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .disabled(manager.isConnecting)
+        } else {
+            Button(action: action) {
+                Label(title, systemImage: systemImage).frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
             .controlSize(.large)
             .disabled(manager.isConnecting)
         }

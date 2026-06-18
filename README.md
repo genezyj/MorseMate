@@ -130,3 +130,7 @@ Document/  plan.md, technical_design.md, workflow.md, reference notes
 - **Session recovery** — reconnect cleanly and resume the lesson if the connection drops. *(P2)*
 - **Production token path** — replace the dev token server with an authenticated HTTPS
   service and drop the local-network ATS exception. *(technical_design §6.1, §8)*
+
+## Notes
+
+For reviewers: Out of interest, I will continue to work on this project for fun. Please feel free to evaluate my project based on this [commit](4f4ccbb56285ea0ba3e95174afe05c20ead0fdd5) and disregard the commits that came afterward, especially if the time taken is an important evaluation criterion or concern.

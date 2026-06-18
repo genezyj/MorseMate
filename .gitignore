@@ -1,1 +1,11 @@
 .DS_Store
+
+# Secrets — never commit
+.env
+.env.local
+
+# Python / uv
+agent/.venv/
+__pycache__/
+*.pyc
+.uv/

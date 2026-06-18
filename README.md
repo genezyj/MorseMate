@@ -24,7 +24,7 @@ The split is the core design decision: the **LLM owns pedagogy/conversation**; t
 `Document/technical_design.md`.
 
 **Status:** M1 (backend voice loop) ✅ · M2 (iOS voice round-trip) ✅ · M3 (on-device
-Morse tones + haptics + visual) — next.
+Morse tones + haptics + visual) ✅
 
 ## Prerequisites
 
@@ -107,6 +107,26 @@ voice loop — handy for a fast check. (Haptics, in M3, are device-only.)
 ```
 agent/     Python voice agent + token server (uv)
 ios/       SwiftUI app (Xcode project; project.yml is the XcodeGen source)
-Document/  plan.md, technical_design.md, reference notes
+Document/  plan.md, technical_design.md, workflow.md, reference notes
 .env.example   required environment variables
 ```
+
+## Future improvements
+
+- **Tap-to-send (two-way practice)** — let the learner tap Morse on screen, decode it
+  on-device, and send it back to the agent (`submit_tap` RPC) for feedback. Closes the
+  *hear → identify → send* loop. *(P1; designed in `Document/technical_design.md` §4.2)*
+- **Adaptive progress & pacing** — track which characters are unlocked and the learner's
+  running accuracy, and feed that to the agent so it paces the Koch progression. *(P1)*
+- **Teach more characters and words** — extend beyond E/T to the full alphabet and digits,
+  plus classic and useful sequences such as **SOS**.
+- **Polish the user experience and interaction logistics** — refine the visual/haptic
+  design, state transitions, empty/error/recovery states, and the overall interaction
+  flow. *(non-functional)*
+- **Background running** — keep the audio session alive so a lesson continues when the app
+  is backgrounded or the screen locks. *(P2)*
+- **Post-session summary** — an LLM-generated recap of the characters covered, accuracy, and
+  what to practice next, saved locally. *(P2)*
+- **Session recovery** — reconnect cleanly and resume the lesson if the connection drops. *(P2)*
+- **Production token path** — replace the dev token server with an authenticated HTTPS
+  service and drop the local-network ATS exception. *(technical_design §6.1, §8)*

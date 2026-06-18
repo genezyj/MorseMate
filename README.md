@@ -116,10 +116,15 @@ For reviewers: for your reference, it took around 3.5 hours for the implementati
 
 ## Future improvements
 
-- **Adaptive progress & pacing** — track which characters are unlocked and the learner's
-  running accuracy, and feed that to the agent so it paces the Koch progression. *(P1)*
-- **Teach more characters and words** — extend beyond E/T to the full alphabet and digits,
-  plus classic and useful sequences such as **SOS**. Probably gate it with difficulty level.
+- **Different UI/UX according to difficulty level** — I am thinking about 4 levels, from easy to hard.
+
+|  Level  | decription | input & output |
+| -------- | -------- | -------- |
+| 1 | Repeat Morse code | Hear Morse code, type it out |
+| 2 | Identify Morse code (single character) | Hear Morse code, answer the character by speech |
+| 3 | Translate words | Hear a word, type the Morse code of the word |
+| 4 | Listening Morse code | Hear Morse code, answer the word by speech |
+
 - **Polish the user experience and interaction logistics** — refine the visual/haptic
   design, state transitions, empty/error/recovery states, and the overall interaction
   flow. *(non-functional)*

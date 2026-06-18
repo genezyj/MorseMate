@@ -1,0 +1,11 @@
+## Xcode / build artifacts
+DerivedData/
+build/
+*.xcuserstate
+**/xcuserdata/
+
+## SwiftPM local state (keep Package.resolved for reproducible builds)
+.swiftpm/
+
+## macOS
+.DS_Store

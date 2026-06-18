@@ -1,0 +1,43 @@
+name: MorseMate
+options:
+  bundleIdPrefix: com.morsemate
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+packages:
+  LiveKit:
+    url: https://github.com/livekit/client-sdk-swift
+    from: "2.5.0"
+targets:
+  MorseMate:
+    type: application
+    platform: iOS
+    sources:
+      - path: MorseMate
+    dependencies:
+      - package: LiveKit
+        product: LiveKit
+    info:
+      path: MorseMate/Info.plist
+      properties:
+        CFBundleDisplayName: MorseMate
+        UILaunchScreen: {}
+        NSMicrophoneUsageDescription: "MorseMate uses your microphone so you can talk to your Morse tutor."
+        NSCameraUsageDescription: "MorseMate does not use the camera; the LiveKit SDK requires this entry."
+        # On a physical device, the app reaches the token server over the local
+        # network (your Mac's LAN IP). iOS requires this usage string for that.
+        NSLocalNetworkUsageDescription: "MorseMate connects to your Mac's token server on the local network to get a session token."
+        # Dev-only: the token server runs over plain HTTP on the local network.
+        # Production uses an HTTPS token server, so this exception is removed there.
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.morsemate.app
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        # Device builds use automatic signing; the reviewer selects their own
+        # Team in Xcode (Signing & Capabilities). No team is hardcoded here.
+        CODE_SIGN_STYLE: Automatic

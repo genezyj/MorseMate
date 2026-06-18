@@ -16,6 +16,7 @@
 		688AFEBCED53279365CD2F27 /* RoomManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17C797D0CC2AFF08EF4D1E68 /* RoomManager.swift */; };
 		6E281715AC6F49C8298B1CE6 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C4389F79094C671336CA17D /* AppConfig.swift */; };
 		7AC2E45D6AC140D1061AC394 /* LiveKit in Frameworks */ = {isa = PBXBuildFile; productRef = 65D4A3CE855A776902449E4B /* LiveKit */; };
+		881868E0DA37BC0EEA487016 /* TapPadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BCF189FF7B1239BC80A7BFA /* TapPadView.swift */; };
 		A6CABED6A597254859CF0D4A /* MorseCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E2B6835C873A2757CA57CB /* MorseCode.swift */; };
 /* End PBXBuildFile section */
 
@@ -25,6 +26,7 @@
 		17C797D0CC2AFF08EF4D1E68 /* RoomManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomManager.swift; sourceTree = "<group>"; };
 		257263CE24272D57C435F569 /* MorseMateApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseMateApp.swift; sourceTree = "<group>"; };
 		40C388C8FC93C79AFE2511B2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		4BCF189FF7B1239BC80A7BFA /* TapPadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapPadView.swift; sourceTree = "<group>"; };
 		4C4389F79094C671336CA17D /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 		5AAA6A8310C99053C1CE5190 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		84E2B6835C873A2757CA57CB /* MorseCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorseCode.swift; sourceTree = "<group>"; };
@@ -73,6 +75,7 @@
 				257263CE24272D57C435F569 /* MorseMateApp.swift */,
 				C2E52BD424C8E2FBD856D6F0 /* MorsePlayer.swift */,
 				17C797D0CC2AFF08EF4D1E68 /* RoomManager.swift */,
+				4BCF189FF7B1239BC80A7BFA /* TapPadView.swift */,
 				09DFA68FDEF29899607B1091 /* TokenService.swift */,
 			);
 			path = MorseMate;
@@ -160,6 +163,7 @@
 				3494B6E9463E99AC5EF5E86D /* MorseMateApp.swift in Sources */,
 				2E91231FB944ED97851CD083 /* MorsePlayer.swift in Sources */,
 				688AFEBCED53279365CD2F27 /* RoomManager.swift in Sources */,
+				881868E0DA37BC0EEA487016 /* TapPadView.swift in Sources */,
 				377A437F8FDF38B9669CBF43 /* TokenService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

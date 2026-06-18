@@ -57,4 +57,24 @@ enum MorseCode {
     static func ditSeconds(wpm: Int) -> Double {
         1.2 / Double(max(1, wpm))
     }
+
+    // MARK: Decoding (for tap-to-send)
+
+    /// Inverse of `table`: a dot/dash pattern (e.g. ".-") → its character.
+    static let reverseTable: [String: Character] = {
+        var map: [String: Character] = [:]
+        for (character, pattern) in table { map[pattern] = character }
+        return map
+    }()
+
+    /// Decode a sequence of per-letter dot/dash patterns into text. Each element
+    /// is one letter's pattern (e.g. ["." , "-"] → "ET"). An unrecognized pattern
+    /// becomes "?" so the agent can tell the learner it wasn't a valid letter.
+    static func decode(_ letters: [String]) -> String {
+        let decoded = letters
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+            .map { reverseTable[$0].map(String.init) ?? "?" }
+        return decoded.joined()
+    }
 }

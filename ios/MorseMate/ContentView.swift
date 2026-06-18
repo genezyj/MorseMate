@@ -115,6 +115,11 @@ struct ContentView: View {
                     .font(.headline)
                     .foregroundStyle(.secondary)
             }
+
+            TapPadView { text in
+                Task { await manager.submitTap(text) }
+            }
+
             Button(role: .destructive) {
                 Task { await manager.disconnect() }
             } label: {

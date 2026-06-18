@@ -123,6 +123,19 @@ final class RoomManager: ObservableObject {
         await room.disconnect()
     }
 
+    /// Send the learner's tapped Morse to the agent for feedback (the "send" half
+    /// of the loop, technical_design §4.2). Symmetric to the `play_morse` RPC.
+    func submitTap(_ text: String) async {
+        let trimmed = text.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty, let agentIdentity = agent?.identity else { return }
+        let payload = #"{"decoded":"\#(trimmed)"}"#
+        _ = try? await room.localParticipant.performRpc(
+            destinationIdentity: agentIdentity,
+            method: "submit_tap",
+            payload: payload
+        )
+    }
+
     /// Register the `play_morse` RPC method so the agent can drive on-device Morse
     /// playback (technical_design §4.1). Acks with the played duration; never
     /// throws back to the agent — a render hiccup must not break the turn.

@@ -110,12 +110,12 @@ ios/       SwiftUI app (Xcode project; project.yml is the XcodeGen source)
 Document/  plan.md, technical_design.md, workflow.md, reference notes
 .env.example   required environment variables
 ```
+## Notes
+
+For reviewers: for your reference, it took around 3.5 hours for the implementation (plan, design, code gen, test on real device, and draft the workflow.md) starting from scratch, and I shipped P0 features within the given time frame. For personal interest, I love the product idea and plan to work on it as a side project! I might add some new features on top of the P0 features. I do respect and honor the evaluation process, so please feel free to evaluate my works based on this [commit](https://github.com/genezyj/MorseMate/commit/4f4ccbb56285ea0ba3e95174afe05c20ead0fdd5) and disregard the commits that came afterward (if any), especially if the time taken is an important evaluation criterion or concern.
 
 ## Future improvements
 
-- **Tap-to-send (two-way practice)** — let the learner tap Morse on screen, decode it
-  on-device, and send it back to the agent (`submit_tap` RPC) for feedback. Closes the
-  *hear → identify → send* loop. *(P1; designed in `Document/technical_design.md` §4.2)*
 - **Adaptive progress & pacing** — track which characters are unlocked and the learner's
   running accuracy, and feed that to the agent so it paces the Koch progression. *(P1)*
 - **Teach more characters and words** — extend beyond E/T to the full alphabet and digits,
@@ -131,6 +131,4 @@ Document/  plan.md, technical_design.md, workflow.md, reference notes
 - **Production token path** — replace the dev token server with an authenticated HTTPS
   service and drop the local-network ATS exception. *(technical_design §6.1, §8)*
 
-## Notes
 
-For reviewers: for your reference, it took around 3.5 hours for the implementation (plan, design, code gen, test on real device, and draft the workflow.md) starting from scratch, and I shipped P0 features within the given time frame. For personal interest, I love the product idea and plan to work on it as a side project. I might add new features based on what I submitted . I do respect and honor the evaluation process, so please kindly and feel free to evaluate my works based on this [commit](https://github.com/genezyj/MorseMate/commit/4f4ccbb56285ea0ba3e95174afe05c20ead0fdd5) and disregard the commits that came afterward, especially if the time taken is an important evaluation criterion or concern.

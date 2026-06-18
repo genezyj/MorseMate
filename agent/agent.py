@@ -51,7 +51,7 @@ Each practice round — follow this loop exactly, in this order:
 0. If user just come in to the session, make a self introduction and what will you teach.
     THEN give a short heads-up that the next one is coming — for example, "here's the first one, listen."
 1. PLAY one test (here, one test means e, t, or any combination of e and t. Starting from 
-    1-charactor sequence, then 2-character sequence, and then to 3 character sequence) with
+    1-charactor sequence, then 2-character sequence) with
      `play_morse`, then stop and wait. Play only ONE per round.
 2. Stop and wait. Let the student say what they think they heard.
 3. When they answer, your spoken reply comes first and must finish before any sound:
@@ -70,6 +70,13 @@ Critical ordering rules — the most important rules in this prompt:
 - One sound per turn: judge the previous answer, cue the next, then play exactly ONE
   test. Never play a new sound while still judging — finish speaking the judgement first.
 - After you play, do not talk over the tones — wait for the student's answer.
+
+Sending practice (the student can tap, too):
+- Besides answering out loud, the student can tap Morse on an on-screen key and send
+  it. You will receive their tapped letters as their answer — judge it exactly like a
+  spoken answer (right → praise then cue the next; wrong → correct them, then continue).
+- From time to time, invite the student to try *sending*: ask them to tap out one
+  letter (E or T) on the key, then judge what they send back.
 
 Style:
 - Speak naturally and concisely. Everything you say is spoken aloud, so no on-screen
@@ -146,6 +153,24 @@ async def entrypoint(ctx: agents.JobContext) -> None:
     )
 
     await session.start(room=ctx.room, agent=MorseTutor(room=ctx.room))
+
+    # Tap-to-send: the device decodes the student's tapped Morse and sends it here
+    # (design §4.2). Inject it as the student's answer and let the agent judge it.
+    async def _on_submit_tap(data: rtc.RpcInvocationData) -> str:
+        try:
+            decoded = str(json.loads(data.payload).get("decoded", "")).strip()
+        except Exception:
+            decoded = ""
+        session.generate_reply(
+            instructions=(
+                f"The student just tapped out '{decoded}' on the Morse key as their "
+                "answer. Judge it against what you most recently asked or played: say "
+                "whether it's right, correct them if not, then continue the practice loop."
+            )
+        )
+        return "{}"
+
+    ctx.room.local_participant.register_rpc_method("submit_tap", _on_submit_tap)
 
     # The client signals intent via the room name: "-cont-" means the student is
     # resuming, so skip the full introduction and go straight back to practice.

@@ -119,7 +119,7 @@ For reviewers: for your reference, it took around 3.5 hours for the implementati
 - **Adaptive progress & pacing** — track which characters are unlocked and the learner's
   running accuracy, and feed that to the agent so it paces the Koch progression. *(P1)*
 - **Teach more characters and words** — extend beyond E/T to the full alphabet and digits,
-  plus classic and useful sequences such as **SOS**.
+  plus classic and useful sequences such as **SOS**. Probably gate it with difficulty level.
 - **Polish the user experience and interaction logistics** — refine the visual/haptic
   design, state transitions, empty/error/recovery states, and the overall interaction
   flow. *(non-functional)*

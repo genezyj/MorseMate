@@ -3,10 +3,18 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var manager = RoomManager()
+    @State private var showingMorseTable = false
 
     var body: some View {
         VStack(spacing: 28) {
             header
+
+            Button {
+                showingMorseTable = true
+            } label: {
+                Label("Morse code table", systemImage: "tablecells")
+            }
+            .buttonStyle(.bordered)
 
             Spacer()
 
@@ -33,6 +41,11 @@ struct ContentView: View {
         .animation(.default, value: manager.connectionState)
         .animation(.default, value: manager.errorMessage)
         .animation(.default, value: manager.hasPreviousSession)
+        .sheet(isPresented: $showingMorseTable) {
+            MorseTableView()
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
     }
 
     // MARK: Sections

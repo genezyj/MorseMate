@@ -67,6 +67,11 @@ enum MorseCode {
         return map
     }()
 
+    /// Render a "."/"-" pattern as Morse glyphs (· / –) for display.
+    static func glyphs(for pattern: String) -> String {
+        pattern.map { $0 == "." ? "·" : "–" }.joined()
+    }
+
     /// Decode a sequence of per-letter dot/dash patterns into text. Each element
     /// is one letter's pattern (e.g. ["." , "-"] → "ET"). An unrecognized pattern
     /// becomes "?" so the agent can tell the learner it wasn't a valid letter.

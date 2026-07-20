@@ -5,8 +5,6 @@ tutor. It runs the STT-LLM-TTS pipeline (via **LiveKit Inference**, so no
 per-provider API keys), holds a spoken conversation with a Morse-instructor
 persona, and drives on-device Morse playback through the `play_morse` RPC tool.
 
-See `../Document/technical_design.md` (§4–5) for the full design.
-
 ## Requirements
 
 - **Python ≥ 3.10**

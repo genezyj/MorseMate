@@ -5,7 +5,6 @@ Morse code by ear; when it wants you to *hear* Morse, it commands the device to 
 deterministic tones. Built on [LiveKit](https://livekit.io) with a Python voice agent
 and a native SwiftUI client.
 
-- **`plan.md`** — product plan · **`Document/technical_design.md`** — technical design
 - Subject chosen because Morse *is* sound, which justifies a voice-first, multisensory
   mobile experience (hear → feel → see).
 
@@ -20,8 +19,7 @@ On-device Morse engine (M3)
 
 The split is the core design decision: the **LLM owns pedagogy/conversation**; the
 **device owns exact Morse timing**. The agent never vocalizes Morse — it calls a
-`play_morse` tool that the device renders deterministically. See
-`Document/technical_design.md`.
+`play_morse` tool that the device renders deterministically.
 
 **Status:** M1 (backend voice loop) ✅ · M2 (iOS voice round-trip) ✅ · M3 (on-device
 Morse tones + haptics + visual) ✅
@@ -107,12 +105,11 @@ voice loop — handy for a fast check. (Haptics, in M3, are device-only.)
 ```
 agent/     Python voice agent + token server (uv)
 ios/       SwiftUI app (Xcode project; project.yml is the XcodeGen source)
-Document/  plan.md, technical_design.md, workflow.md, reference notes
 .env.example   required environment variables
 ```
 ## Notes
 
-For reviewers: for your reference, it took around 3.5 hours for the implementation (plan, design, code gen, test on real device, and draft the workflow.md) starting from scratch, and I shipped P0 features within the given time frame. For personal interest, I love the product idea and plan to work on it as a side project! I might add some new features on top of the P0 features. I do respect and honor the evaluation process, so please feel free to evaluate my works based on this [commit](https://github.com/genezyj/MorseMate/commit/4f4ccbb56285ea0ba3e95174afe05c20ead0fdd5) and disregard the commits that came afterward (if any), especially if the time taken is an important evaluation criterion or concern.
+For reviewers: for your reference, it took around 3.5 hours for the implementation (plan, design, code gen, test on real device, and draft the workflow.md) starting from scratch, and I shipped P0 features within the given time frame. For personal interest, I love the product idea and plan to work on it as a side project! I might add some new features on top of the P0 features. I do respect and honor the evaluation process, so please feel free to evaluate my works based on this [commit](https://github.com/genezyj/MorseMate/commit/93fc93050f975b8d16df900788ad4b2634e13c4b) and disregard the commits that came afterward (if any), especially if the time taken is an important evaluation criterion or concern.
 
 ## Future improvements
 
@@ -134,6 +131,6 @@ For reviewers: for your reference, it took around 3.5 hours for the implementati
   what to practice next, saved locally. *(P2)*
 - **Session recovery** — reconnect cleanly and resume the lesson if the connection drops. *(P2)*
 - **Production token path** — replace the dev token server with an authenticated HTTPS
-  service and drop the local-network ATS exception. *(technical_design §6.1, §8)*
+  service and drop the local-network ATS exception.
 
 

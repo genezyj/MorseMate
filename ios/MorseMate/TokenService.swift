@@ -34,7 +34,7 @@ enum TokenServiceError: LocalizedError {
 ///
 /// The app holds no API secret; the backend mints a short-lived token for a room
 /// from its `.env` credentials. For production this becomes an authenticated
-/// HTTPS service (see `Document/technical_design.md` §6.1, §8).
+/// HTTPS service.
 struct TokenService {
     func fetchConnectionDetails(
         roomName: String? = nil,

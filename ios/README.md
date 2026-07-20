@@ -4,8 +4,6 @@ The SwiftUI client for MorseMate. It connects to a LiveKit room, streams your
 microphone to the voice agent, and plays the tutor's speech — the M2 voice
 round-trip. On-device Morse tone playback (`play_morse`) lands in M3.
 
-See `../Document/technical_design.md` §6 for the design.
-
 ## Requirements
 
 - **Xcode 16+**, iOS 17+ deployment target

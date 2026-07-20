@@ -7,6 +7,7 @@
 # Local-only working docs — never publish
 Document/
 CLAUDE.md
+AGENTS.md
 
 # Python / uv
 agent/.venv/

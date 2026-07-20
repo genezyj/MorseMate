@@ -57,13 +57,3 @@ static let tokenServerURL = "http://192.168.x.x:8080"
 For the agent to join your room, run it with **automatic dispatch** (the default —
 `uv run python agent.py dev`; do not set `LIVEKIT_AGENT_NAME`).
 
-## What works at M2
-
-- Connect / disconnect with a LiveKit room (token from the backend token server).
-- Microphone permission flow.
-- Live two-way voice conversation with the tutor.
-- Agent-state surface (`waiting / listening / thinking / speaking`) and a speaking
-  indicator, read from the agent participant's `lk.agent.state` attribute.
-
-The custom audio session + on-device Morse engine (deterministic tones, haptics,
-visual flash) — and the client-side `play_morse` RPC handler — are M3.

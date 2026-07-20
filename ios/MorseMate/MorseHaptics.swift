@@ -3,7 +3,7 @@ import CoreHaptics
 /// Plays a Morse timeline through the Taptic Engine, in lock-step with the audio.
 ///
 /// Haptics are **device-only** — `supportsHaptics` is false on the Simulator, so
-/// this no-ops there (technical_design §6.4).
+/// this no-ops there.
 final class MorseHaptics {
     private var engine: CHHapticEngine?
 

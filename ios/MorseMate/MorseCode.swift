@@ -2,7 +2,7 @@ import Foundation
 
 /// Pure, deterministic Morse logic — the single source of truth for the audio,
 /// haptic, and visual renderers. Has no dependency on audio hardware or LiveKit,
-/// so it is unit-testable on its own (technical_design §3.3, §7).
+/// so it is unit-testable on its own.
 enum MorseCode {
     /// International Morse for letters, digits, and a few common marks.
     /// `.` = dit, `-` = dah.

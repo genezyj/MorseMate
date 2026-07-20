@@ -2,8 +2,7 @@ import AVFoundation
 import SwiftUI
 
 /// Renders a Morse string deterministically on-device: a precise ~600 Hz sine at
-/// a target WPM, synchronized with haptics and a visual flash (technical_design
-/// §6.3–6.5, §7).
+/// a target WPM, synchronized with haptics and a visual flash.
 ///
 /// The full sequence is known up front, so we pre-render one PCM buffer and play
 /// it through an `AVAudioPlayerNode` — sample-accurate and click-free, without a

@@ -1,9 +1,9 @@
 """MorseMate — LiveKit voice AI Morse-code tutor (backend agent).
 
-Implements M1 of Document/technical_design.md: the real-time voice loop with a
-Morse-instructor persona over the STT-LLM-TTS LiveKit Inference pipeline.
+Implements M1: the real-time voice loop with a Morse-instructor persona over the
+STT-LLM-TTS LiveKit Inference pipeline.
 
-The `play_morse` tool (design §4.1) is wired but degrades gracefully when no
+The `play_morse` tool is wired but degrades gracefully when no
 device client is connected — which is the normal case while verifying M1 in the
 browser Playground. Deterministic on-device tone rendering lands in M3.
 """
@@ -52,6 +52,13 @@ How you make sound — non-negotiable:
 - If `play_morse` reports that no device is connected, tell the student playback needs
   the MorseMate app and keep practicing conversationally.
 
+Reporting results — also non-negotiable:
+- Every time you judge an answer (whether the student spoke it OR tapped it), you MUST
+  call the `record_result` tool so their device can show the question, their answer,
+  and a running score. Pass the character you were testing, what the student answered,
+  and whether it was correct. This is bookkeeping only — it never makes sound and never
+  replaces speaking your judgement out loud.
+
 Each practice round — follow this loop exactly, in this order:
 0. If user just come in to the session, make a self introduction and what will you teach.
     THEN give a short heads-up that the next one is coming — for example, "here's the first one, listen."
@@ -61,10 +68,12 @@ Each practice round — follow this loop exactly, in this order:
 3. When they answer, your spoken reply comes first and must finish before any sound:
    a. Judge their answer out loud. If they were RIGHT, say so warmly. If they were
       WRONG, gently correct them and tell them what it actually was.
-   b. Then say a short heads-up that the next one is coming, e.g. "Okay, here's the
+   b. Then call `record_result` with the character you tested, what they answered, and
+      whether it was correct (this is silent — it just updates their on-screen score).
+   c. Then say a short heads-up that the next one is coming, e.g. "Okay, here's the
       next one, listen."
-4. ONLY after speaking both (a) and (b), call `play_morse` for the next test. The
-   `play_morse` call is always the LAST thing in your turn — never the first.
+4. ONLY after speaking the judgement and the cue, call `play_morse` for the next test.
+   The `play_morse` call is always the LAST thing in your turn — never the first.
 5. Then stop and wait, and repeat from step 2.
 
 Critical ordering rules — the most important rules in this prompt:
@@ -131,6 +140,44 @@ class MorseTutor(Agent):
             )
             return json.loads(ack)
         except Exception as exc:  # RPC failure must never crash the turn (design §4.3)
+            return {"status": "error", "detail": str(exc)}
+
+    @function_tool()
+    async def record_result(
+        self, context: RunContext, expected: str, answer: str, correct: bool
+    ) -> dict:
+        """Report the outcome of the student's last answer to their device.
+
+        Call this every time you judge an answer (spoken or tapped) so the app can
+        show the question, the student's answer, and a running score. This makes no
+        sound and does not replace speaking your judgement out loud — it is silent
+        bookkeeping. The device counts attempts and accuracy itself.
+
+        Args:
+            expected: The character you were testing this round (e.g. "E").
+            answer: What the student answered (e.g. "E", or "T" if they were wrong).
+            correct: Whether the student's answer was right.
+        """
+        remotes = list(self._room.remote_participants.values())
+        if not remotes:
+            return {"status": "no_device"}
+
+        target = remotes[0].identity
+        try:
+            await self._room.local_participant.perform_rpc(
+                destination_identity=target,
+                method="report_result",
+                payload=json.dumps(
+                    {
+                        "expected": expected.upper(),
+                        "answer": answer.upper(),
+                        "correct": correct,
+                    }
+                ),
+                response_timeout=5.0,
+            )
+            return {"status": "ok"}
+        except Exception as exc:  # never crash the turn over a UI update (design §4.3)
             return {"status": "error", "detail": str(exc)}
 
 

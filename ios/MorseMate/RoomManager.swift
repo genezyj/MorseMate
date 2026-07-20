@@ -9,6 +9,14 @@ private struct MorseCommand: Decodable {
     let wpm: Int?
 }
 
+/// The agent's `report_result` tool payload: the verdict on the student's last
+/// answer, used to drive the on-screen score (the device does the counting).
+private struct ResultReport: Decodable {
+    let expected: String
+    let answer: String
+    let correct: Bool
+}
+
 /// Owns the LiveKit `Room` and all session orchestration, keeping it out of the
 /// SwiftUI views (per project conventions). Views observe this object; it
 /// re-publishes the room's changes so connection/participant updates drive the UI.
@@ -27,6 +35,19 @@ final class RoomManager: ObservableObject {
     /// killing the app resets it (cold start → only "Start talking"), while
     /// backgrounding preserves it. Drives the continue / new-session choice.
     @Published private(set) var hasPreviousSession = false
+
+    /// Running score for the current session, driven by the agent's `report_result`
+    /// RPC. The device owns this counting/percentage math (deterministic on-device);
+    /// the agent only sends the per-answer verdict.
+    @Published private(set) var attempts = 0
+    @Published private(set) var correctCount = 0
+    @Published private(set) var lastExpected: String?
+    @Published private(set) var lastAnswer: String?
+    @Published private(set) var lastCorrect: Bool?
+
+    var accuracyPercent: Int {
+        attempts == 0 ? 0 : Int((Double(correctCount) / Double(attempts) * 100).rounded())
+    }
 
     private var roomChanges: AnyCancellable?
     private var morseChanges: AnyCancellable?
@@ -76,7 +97,27 @@ final class RoomManager: ObservableObject {
     /// Start a brand-new session: a fresh `morse-new-…` room, so the agent gives
     /// its full self-introduction and starts over.
     func startNewSession() async {
+        resetScore()
         await connect(roomName: "morse-new-\(Self.shortID())")
+    }
+
+    /// Zero the running score. Called when starting a brand-new session; a continued
+    /// session keeps its score so accuracy carries across the resume.
+    private func resetScore() {
+        attempts = 0
+        correctCount = 0
+        lastExpected = nil
+        lastAnswer = nil
+        lastCorrect = nil
+    }
+
+    /// Record the agent's verdict on the student's last answer (from `report_result`).
+    private func recordResult(_ report: ResultReport) {
+        attempts += 1
+        if report.correct { correctCount += 1 }
+        lastExpected = report.expected
+        lastAnswer = report.answer
+        lastCorrect = report.correct
     }
 
     /// Resume practicing: a fresh `morse-cont-…` room (reliable agent dispatch),
@@ -110,7 +151,7 @@ final class RoomManager: ObservableObject {
                 token: details.participantToken,
                 connectOptions: ConnectOptions(enableMicrophone: true)
             )
-            await registerMorseHandler()
+            await registerRpcHandlers()
             hasPreviousSession = true
         } catch let error as TokenServiceError {
             errorMessage = error.errorDescription
@@ -124,7 +165,7 @@ final class RoomManager: ObservableObject {
     }
 
     /// Send the learner's tapped Morse to the agent for feedback (the "send" half
-    /// of the loop, technical_design §4.2). Symmetric to the `play_morse` RPC.
+    /// of the loop). Symmetric to the `play_morse` RPC.
     func submitTap(_ text: String) async {
         let trimmed = text.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty, let agentIdentity = agent?.identity else { return }
@@ -136,10 +177,10 @@ final class RoomManager: ObservableObject {
         )
     }
 
-    /// Register the `play_morse` RPC method so the agent can drive on-device Morse
-    /// playback (technical_design §4.1). Acks with the played duration; never
-    /// throws back to the agent — a render hiccup must not break the turn.
-    private func registerMorseHandler() async {
+    /// Register the agent → device RPC methods. Both ack and never throw back to the
+    /// agent — a render hiccup or UI update must not break the turn.
+    private func registerRpcHandlers() async {
+        // `play_morse` drives on-device Morse playback.
         try? await room.registerRpcMethod("play_morse") { [weak self] data in
             guard let self else { return #"{"status":"unavailable"}"# }
             guard let payload = data.payload.data(using: .utf8),
@@ -149,6 +190,19 @@ final class RoomManager: ObservableObject {
             }
             let ms = await self.morse.play(command.text, wpm: command.wpm ?? 10)
             return #"{"status":"played","durationMs":\#(ms)}"#
+        }
+
+        // `report_result` carries the tutor's verdict on the student's last answer,
+        // driving the on-screen score. The device does the counting.
+        try? await room.registerRpcMethod("report_result") { [weak self] data in
+            guard let self else { return #"{"status":"unavailable"}"# }
+            guard let payload = data.payload.data(using: .utf8),
+                  let report = try? JSONDecoder().decode(ResultReport.self, from: payload)
+            else {
+                return #"{"status":"bad_request"}"#
+            }
+            await self.recordResult(report)
+            return #"{"status":"ok"}"#
         }
     }
 

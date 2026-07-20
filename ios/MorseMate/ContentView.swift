@@ -13,6 +13,7 @@ struct ContentView: View {
                 showingMorseTable = true
             } label: {
                 Label("Morse code table", systemImage: "tablecells")
+                    .fontWeight(.bold)
             }
             .buttonStyle(.bordered)
 
@@ -118,6 +119,8 @@ struct ContentView: View {
 
     private var connectedView: some View {
         VStack(spacing: 20) {
+            statsCard
+
             if manager.morse.isPlaying {
                 keyer(on: manager.morse.isToneOn)
                 Text("Morse: \(manager.morse.lastText)")
@@ -137,11 +140,47 @@ struct ContentView: View {
                 Task { await manager.disconnect() }
             } label: {
                 Label("End session", systemImage: "phone.down.fill")
+                    .fontWeight(.bold)
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
             .controlSize(.large)
         }
+    }
+
+    /// Compact, fixed-height score strip: attempts, running accuracy, and the last
+    /// round's question/answer/verdict. Fixed height keeps the surrounding layout
+    /// (orb, tap pad, end button) from shifting as results arrive.
+    private var statsCard: some View {
+        VStack(spacing: 6) {
+            HStack {
+                Label("\(manager.attempts)", systemImage: "number")
+                Spacer()
+                Label("\(manager.accuracyPercent)%", systemImage: "checkmark.seal")
+            }
+            .font(.subheadline.weight(.semibold))
+
+            if let expected = manager.lastExpected,
+               let answer = manager.lastAnswer,
+               let correct = manager.lastCorrect {
+                HStack(spacing: 6) {
+                    Image(systemName: correct ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .foregroundStyle(correct ? .green : .red)
+                    Text("Heard \(expected) — you answered \(answer)")
+                        .monospaced()
+                }
+                .font(.footnote)
+            } else {
+                Text("Answer by voice or tap — your score shows here.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: 56)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .animation(.default, value: manager.attempts)
     }
 
     /// Simple voice "orb" that pulses while the tutor is speaking.
